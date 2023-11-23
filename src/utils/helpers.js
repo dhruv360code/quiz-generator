@@ -1,8 +1,9 @@
 const questionStore = require("./quesStore");
 
 const _paramsBuilder = (body) => {
+  // all keys sum should be 100
+
   if (body.difficulty) {
-    // all keys sum should be 100
     const sum = Object.values(body.difficulty).reduce((a, b) => a + b, 0);
     if (sum !== 100) {
       return [
@@ -12,7 +13,6 @@ const _paramsBuilder = (body) => {
         null,
       ];
     }
-
     if (
       body.difficulty.easy &&
       ((body.difficulty.easy * body.totalMarks) / 100) % 1 !== 0
@@ -50,6 +50,24 @@ const _paramsBuilder = (body) => {
       {
         property: "difficulty",
         propertyDistribution: body.difficulty,
+        totalMarks: body.totalMarks,
+      },
+    ];
+  } else if (body.topics) {
+    const sum = Object.values(body.topics).reduce((a, b) => a + b, 0);
+    if (sum !== 100) {
+      return [
+        {
+          message: "Sum of topics should be 100",
+        },
+        null,
+      ];
+    }
+    return [
+      null,
+      {
+        property: "topics",
+        propertyDistribution: body.topics,
         totalMarks: body.totalMarks,
       },
     ];
@@ -107,6 +125,10 @@ const _selectQuestions = (key, property, marks) => {
 
     selectedQuestions.push(selectedQuestion);
     currentMarks += selectedQuestion.marks;
+    if (currentMarks > marks) {
+      selectedQuestions.pop();
+      currentMarks -= selectedQuestion.marks;
+    }
   }
 
   console.log(marks, currentMarks);
